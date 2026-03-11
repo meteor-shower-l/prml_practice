@@ -5,7 +5,8 @@ class TreeNode:
     def __init__(self, feature=None, value=None):
         self.feature = feature
         self.value = value
-        self.children = {}
+        self.left = None
+        self.right = None
 
 
 def square_loss(data: pd.Series):
@@ -44,9 +45,21 @@ def find_best_character(data: pd.DataFrame, target: str):
 
 def generate_tree(
     data: pd.DataFrame,  # 原始数据
-    current_layer: float,
+    target: str,
     min_num: int = 0,  # 用于指定每个节点最少样本数
-    max_layer: int = 1e8,  # 用于指定最大层数
-    min_loss: float = 0,  # 用于指定loss阈值
+    accessiable_layer: int = 1e8,  # 用于记录层数
 ):
-    pass
+    if len(data) < min_num or accessiable_layer < 0:
+        return TreeNode(value=data[target].mean())
+    else:
+        character, point = find_best_character(data, target)
+        data_1 = data[data[character] <= point]
+        data_2 = data[data[character] > point]
+        Node = TreeNode(feature=character)
+        Node.left = generate_tree(
+            data_1, target, min_num, accessiable_layer - 1
+        )
+        Node.right = generate_tree(
+            data_2, target, min_num, accessiable_layer - 1
+        )
+        return Node
