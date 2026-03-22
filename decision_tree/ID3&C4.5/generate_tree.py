@@ -18,12 +18,10 @@ def generate_tree(
 ):
 
     # 确定模式
-    if model == 0:
+    if model == 0:  # 使用信息增益,ID3算法
         value_function = function.calculate_infa_gain
-    else:
+    else:  # 使用信息增益比,C4.5算法
         value_function = function.calculate_infa_gain_ratio
-    # 初始化column_list
-    column_list = f_data.columns.to_list()
     # 终止条件
     # 如果数据集中所有目标值相同,则返回叶节点
     if len(f_data[f_target_character].unique()) == 1:
@@ -52,3 +50,14 @@ def generate_tree(
             node.children[value] = generate_tree(
                 sub_data, f_target_character, new_columns, Epsilon, model
             )
+        return node
+
+
+def print_tree_compact(node):
+    if node.value is not None:
+        return f"类别:{node.value}"
+
+    parts = []
+    for value, child in node.children.items():
+        parts.append(f"{node.feature}={value}:{print_tree_compact(child)}")
+    return f"{{{', '.join(parts)}}}"

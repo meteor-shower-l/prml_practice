@@ -1,5 +1,4 @@
-import math
-
+import numpy as np
 import pandas as pd
 
 
@@ -8,7 +7,7 @@ def calculate_entropy(data: pd.DataFrame, target_character: str):
     total_num = len(data[target_character])
     group_num = data.groupby(target_character)[target_character].count()
     proportion = group_num / total_num
-    singel_entropy = -proportion * math.log2(proportion)
+    singel_entropy = -proportion * np.log2(proportion)
     result = singel_entropy.sum()
     return result
 
@@ -47,8 +46,7 @@ def calculate_infa_gain_ratio(
 ):
     info_gain = calculate_entropy(
         data=f_data, target_character=f_target_character
-    )
-    -calculate_conditional_entropy(
+    ) - calculate_conditional_entropy(
         data=f_data,
         target_character=f_target_character,
         condition_character=f_condition_character,
