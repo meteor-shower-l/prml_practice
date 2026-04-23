@@ -119,20 +119,23 @@ def find_best_split_for_feature(
 
     candidate_split_points = (unique_values[:-1] + unique_values[1:]) / 2.0
     best_gain_ratio = -1.0
+    info_gain = -1.0
     best_split_point = None
 
     for split_point in candidate_split_points:
         current_gain_ratio = calculate_info_gain_ratio(
             feature_values, float(split_point), labels, epsilon
         )
+        current_gain = calculate_info_gain(feature_values, float(split_point), labels)
         if current_gain_ratio > best_gain_ratio:
             best_gain_ratio = current_gain_ratio
+            info_gain = current_gain
             best_split_point = float(split_point)
 
     if best_split_point is None or best_gain_ratio < epsilon:
         return None
 
-    return best_split_point, best_gain_ratio
+    return best_split_point, best_gain_ratio, info_gain
 
 
 # 在所有特征上选择全局最优划分属性，返回(特征名, 切分点, 信息增益比)
@@ -141,26 +144,31 @@ def choose_best_feature(
     y: np.ndarray,
     epsilon: float = 1e-10,
 ):
-    best_feature = None
-    best_split_point = None
-    best_gain_ratio = -1.0
-
+    candidates = []
     for feature_name in X.columns:
         feature_values = X[feature_name].to_numpy()
         result = find_best_split_for_feature(feature_values, y, epsilon)
         if result is None:
             continue
 
-        split_point, gain_ratio = result
-        if gain_ratio > best_gain_ratio:
-            best_gain_ratio = gain_ratio
-            best_feature = feature_name
-            best_split_point = split_point
+        split_point, gain_ratio, info_gain = result
+        candidates.append(
+            {
+                "feature": feature_name,
+                "split_point": split_point,
+                "info_gain": info_gain,
+                "gain_ratio": gain_ratio,
+            }
+        )
 
-    if best_feature is None or best_split_point is None:
+    if not candidates:
         return None
 
-    return best_feature, best_split_point, best_gain_ratio
+    avg_gain = float(np.mean([c["info_gain"] for c in candidates]))
+    filtered = [c for c in candidates if c["info_gain"] >= avg_gain - epsilon]
+
+    best = max(filtered, key=lambda c: c["gain_ratio"])
+    return best["feature"], best["split_point"], best["gain_ratio"]
 
 
 # 用于在得到树之后，对给定样本类别进行预测
