@@ -317,14 +317,7 @@ feature_names = X.columns.tolist()
 X_train_df = pd.DataFrame(X_train, columns=feature_names)
 X_test_df = pd.DataFrame(X_test, columns=feature_names)
 
-tree = build_tree(
-    X=X_train_df,
-    y=y_train,
-    max_depth=6,
-    min_samples_split=8,
-    min_samples_leaf=4,
-    min_gain_ratio=1e-3,
-)
+tree = build_tree(X=X_train_df, y=y_train)
 
 # 在测试集上逐样本预测
 y_pred = np.array([predict(tree, row.to_dict()) for _, row in X_test_df.iterrows()])
