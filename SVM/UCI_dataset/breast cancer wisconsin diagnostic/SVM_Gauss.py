@@ -38,7 +38,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # 定义并训练模型
-svm_gauss = SVC(kernel="rbf", gamma="scale", C=1, probability=True, random_state=42)
+svm_gauss = SVC(kernel="rbf", gamma="scale", C=2, probability=True, random_state=42)
 svm_gauss.fit(X_train, y_train)
 
 # 测试指标
